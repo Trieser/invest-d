@@ -141,4 +141,3 @@ php artisan serve
 - **Default Route**: Login page
 - **Admin Panel**: Coming soon...
 
-## 📁 Project Structure
