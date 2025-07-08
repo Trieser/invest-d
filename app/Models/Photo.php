@@ -17,6 +17,7 @@ class Photo extends Model
         'mime_type',
         'file_size',
         'description',
+        'genre_id',
     ];
 
     protected $casts = [
@@ -26,6 +27,11 @@ class Photo extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function genre()
+    {
+        return $this->belongsTo(Genre::class);
     }
 
     public function getFileSizeInMB()

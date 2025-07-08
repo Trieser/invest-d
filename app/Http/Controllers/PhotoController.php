@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use App\Models\Genre;
 
 class PhotoController extends Controller
 {
@@ -18,9 +19,11 @@ class PhotoController extends Controller
     public function index()
     {
         $photos = auth()->user()->photos()->latest()->get();
+        $genres = Genre::all();
 
         return Inertia::render('User/Photos', [
             'photos' => $photos,
+            'genres' => $genres,
         ]);
     }
 
@@ -48,6 +51,7 @@ class PhotoController extends Controller
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
             'description' => $request->description,
+            'genre_id' => $request->input('genre_id'),
         ]);
 
         return response()->json([
