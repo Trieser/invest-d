@@ -19,11 +19,44 @@ class PhotoController extends Controller
     public function index()
     {
         $photos = auth()->user()->photos()->latest()->get();
-        $genres = Genre::all();
+        
+        // Get only genres that have photos
+        $activeGenres = Genre::whereHas('photos', function($query) {
+            $query->where('user_id', auth()->id());
+        })->withCount(['photos' => function($query) {
+            $query->where('user_id', auth()->id());
+        }])->get();
+        
+        // Get all genres for the dropdown
+        $allGenres = Genre::all();
 
         return Inertia::render('User/Photos', [
             'photos' => $photos,
-            'genres' => $genres,
+            'genres' => $allGenres,
+            'activeGenres' => $activeGenres,
+        ]);
+    }
+
+    public function photosByGenre(Genre $genre)
+    {
+        // Check if user has photos in this genre
+        $photos = auth()->user()->photos()->where('genre_id', $genre->id)->latest()->get();
+        
+        // Get only genres that have photos
+        $activeGenres = Genre::whereHas('photos', function($query) {
+            $query->where('user_id', auth()->id());
+        })->withCount(['photos' => function($query) {
+            $query->where('user_id', auth()->id());
+        }])->get();
+        
+        // Get all genres for the dropdown
+        $allGenres = Genre::all();
+
+        return Inertia::render('User/PhotosByGenre', [
+            'photos' => $photos,
+            'genre' => $genre,
+            'genres' => $allGenres,
+            'activeGenres' => $activeGenres,
         ]);
     }
 

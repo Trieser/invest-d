@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Inertia } from "@inertiajs/inertia";
+import Sidebar from '../../Components/Sidebar';
 
 const backgroundUrl = "/images/landscape.jpg";
 const natureQuotes = [
@@ -10,8 +11,9 @@ const natureQuotes = [
     "Adopt the pace of nature: her secret is patience. – Ralph Waldo Emerson",
 ];
 
-export default function UserDashboard({ auth, photoCount = 0 }) {
+export default function UserDashboard({ auth, photoCount = 0, activeGenres = [] }) {
     const [quote, setQuote] = useState("");
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         setQuote(natureQuotes[Math.floor(Math.random() * natureQuotes.length)]);
@@ -23,6 +25,14 @@ export default function UserDashboard({ auth, photoCount = 0 }) {
 
     const goToPhotos = () => {
         Inertia.visit("/user/photos");
+    };
+
+    const goToGenres = () => {
+        Inertia.visit("/user/genres");
+    };
+
+    const toggleSidebar = () => {
+        setSidebarOpen(!sidebarOpen);
     };
 
     if (!auth || !auth.user) {
@@ -41,116 +51,132 @@ export default function UserDashboard({ auth, photoCount = 0 }) {
     }
 
     return (
-        <div
-            className="min-h-screen flex flex-col relative overflow-hidden"
-            style={{
-                backgroundImage: `url('${backgroundUrl}')`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-            }}
-        >
-            {/* Animated Gradient Overlay */}
-            <div className="absolute inset-0 z-0 pointer-events-none animate-gradient bg-gradient-to-br from-green-400/40 via-blue-400/30 to-yellow-200/30 backdrop-blur-sm"></div>
-            {/* Static dark overlay for readability */}
-            <div className="absolute inset-0 bg-black/40 z-0"></div>
+        <div className="min-h-screen flex bg-gray-50">
+            {/* Sidebar */}
+            <Sidebar 
+                auth={auth}
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                activeGenres={activeGenres}
+                currentPage="dashboard"
+            />
 
-            <nav className="relative z-10 bg-white/60 backdrop-blur-md shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col lg:ml-0">
+                {/* Top Bar */}
+                <div className="bg-white shadow-sm border-b border-gray-200">
+                    <div className="flex items-center justify-between h-16 px-6">
                         <div className="flex items-center">
-                            <h1 className="text-xl font-semibold text-gray-900 drop-shadow">
-                                {auth.user.name} Dashboard
-                            </h1>
+                            <button
+                                onClick={toggleSidebar}
+                                className="lg:hidden text-gray-500 hover:text-gray-700 mr-4"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <h2 className="text-xl font-semibold text-gray-900">Dashboard</h2>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <span className="text-gray-700 drop-shadow">
-                                Welcome, {auth.user.name}
+                            <span className="text-sm text-gray-600">
+                                Welcome back, {auth.user.name}
                             </span>
-                            <button
-                                onClick={handleLogout}
-                                className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-md hover:from-blue-600 hover:to-green-600 transition duration-200 shadow"
-                            >
-                                Logout
-                            </button>
                         </div>
                     </div>
                 </div>
-            </nav>
 
-            <main className="relative z-10 flex-1 flex items-center justify-center">
-                <div className="w-full max-w-3xl px-4">
-                    <div className="bg-white/60 backdrop-blur-lg rounded-2xl shadow-2xl p-10 animate-fade-in border border-white/30">
-                        <h2 className="text-3xl font-extrabold text-green-900 mb-2 drop-shadow flex items-center gap-2">
-                            <span>🌿</span> Welcome, {auth.user.name}!
-                        </h2>
-                        <p className="text-green-800 italic mb-6 text-lg transition-all duration-500">
-                            “{quote}”
-                        </p>
-                        <div className="flex items-center gap-6 mb-8">
-                            <div className="flex flex-col items-center">
-                                <span className="text-4xl font-bold text-blue-700 drop-shadow">{photoCount}</span>
-                                <span className="text-xs text-gray-700">Your Photos</span>
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <span className="text-4xl font-bold text-green-700 drop-shadow">🌱</span>
-                                <span className="text-xs text-gray-700">Nature Points</span>
+                {/* Main Content Area */}
+                <main className="flex-1 p-6">
+                    <div className="max-w-4xl mx-auto">
+                        {/* Welcome Card */}
+                        <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-8 mb-8 border border-green-100">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-green-900 mb-2">
+                                        Welcome, {auth.user.name}! 🌿
+                                    </h1>
+                                    <p className="text-green-800 italic text-lg mb-4">
+                                        "{quote}"
+                                    </p>
+                                    <div className="flex items-center space-x-8">
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-blue-600">{photoCount}</div>
+                                            <div className="text-sm text-gray-600">Total Photos</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-green-600">🌱</div>
+                                            <div className="text-sm text-gray-600">Nature Points</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="hidden md:block">
+                                    <div className="text-6xl">📷</div>
+                                </div>
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        {/* Quick Actions */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <div
-                                className="bg-blue-50/80 p-6 rounded-xl cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-blue-100/80 transition-all duration-300 shadow flex flex-col items-center"
                                 onClick={goToPhotos}
+                                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-green-300 transition-all duration-200 cursor-pointer group"
                             >
-                                <div className="text-4xl mb-2 animate-bounce">📸</div>
-                                <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                                    Photo Gallery
-                                </h3>
-                                <p className="text-blue-700 text-center">
-                                    Upload and manage your nature photos
-                                </p>
-                                <p className="text-sm text-blue-600 mt-2">
-                                    Drag & drop photos up to 11MB
-                                </p>
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                                        <span className="text-2xl">📤</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-900">Upload Photos</h3>
+                                        <p className="text-gray-600 text-sm">Add new photos to your gallery</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="bg-green-50/80 p-6 rounded-xl shadow flex flex-col items-center hover:scale-105 hover:shadow-xl hover:bg-green-100/80 transition-all duration-300">
-                                <div className="text-4xl mb-2 animate-pulse">🌱</div>
-                                <h3 className="text-lg font-semibold text-green-900">
-                                    Activity
-                                </h3>
-                                <p className="text-green-700 text-center">
-                                    View your recent activity and nature inspiration
-                                </p>
-                                <ul className="mt-2 text-green-800 text-sm list-disc list-inside text-left">
-                                    <li>Upload your latest photos</li>
-                                    <li>
-                                        Explore other user galleries (coming soon)
-                                    </li>
-                                    <li>Get nature photography tips</li>
-                                </ul>
+
+                            <div
+                                onClick={goToGenres}
+                                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-green-300 transition-all duration-200 cursor-pointer group"
+                            >
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                                        <span className="text-2xl">🏷️</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-900">Manage Genres</h3>
+                                        <p className="text-gray-600 text-sm">Add or remove photo genres</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-3 text-sm text-gray-600">
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <span>Welcome to your photo management system!</span>
+                                </div>
+                                <div className="flex items-center space-x-3 text-sm text-gray-600">
+                                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                    <span>You have {photoCount} photos in your gallery</span>
+                                </div>
+                                <div className="flex items-center space-x-3 text-sm text-gray-600">
+                                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                    <span>Ready to organize your photos with genres</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </main>
-            {/* CSS for fade-in and animated gradient */}
-            <style>{`
-                .animate-fade-in {
-                    animation: fadeIn 1.2s;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(30px);}
-                    to { opacity: 1; transform: translateY(0);}
-                }
-                .animate-gradient {
-                    background-size: 200% 200%;
-                    animation: gradientMove 8s ease-in-out infinite;
-                }
-                @keyframes gradientMove {
-                    0% {background-position: 0% 50%;}
-                    50% {background-position: 100% 50%;}
-                    100% {background-position: 0% 50%;}
-                }
-            `}</style>
+                </main>
+            </div>
+
+            {/* Overlay for mobile */}
+            {sidebarOpen && (
+                <div 
+                    className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+                    onClick={toggleSidebar}
+                ></div>
+            )}
         </div>
     );
 }
