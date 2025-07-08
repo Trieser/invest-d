@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
@@ -22,6 +23,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     /**
@@ -44,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -61,5 +65,26 @@ class User extends Authenticatable
     public function isUser(): bool 
     {
         return $this->role === 'user';
+    }
+
+    public function loginAttempts()
+    {
+        return $this->hasMany(LoginAttempt::class);
+    }
+
+    public function updateLastLogin(Request $request)
+    {
+        $this->update([
+            'last_login_at' => now(),
+            'last_login_ip' => $request->ip(),
+        ]);
+    }
+
+    public function getFailedLoginAttemptsCount($hours = 24)
+    {
+        return $this->loginAttempts()
+            ->where('success', false)
+            ->where('created_at', '>=', now()->subHours($hours))
+            ->count();
     }
 }
