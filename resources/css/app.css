@@ -9,3 +9,19 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Sidebar Popout Animation */
+.animate-popout { 
+  animation: popout 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+@keyframes popout { 
+  from { 
+    opacity: 0; 
+    transform: translateX(-8px) scale(0.95);
+  } 
+  to { 
+    opacity: 1; 
+    transform: none; 
+  } 
+}
