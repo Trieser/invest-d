@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Inertia } from '@inertiajs/inertia';
 
 export default function Navbar({ auth }) {
     const [searchQuery, setSearchQuery] = useState('');
@@ -28,29 +29,29 @@ export default function Navbar({ auth }) {
 
     return (
         <nav
-            className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-green-100 via-blue-50 to-green-50 shadow-md flex items-center z-40 transition-all duration-300 border-b border-green-100"
-            style={{ paddingLeft: 104, paddingRight: 32 }}
+            className="fixed top-0 left-0 right-0 bg-gradient-to-r from-green-100 via-blue-50 to-green-50 shadow-md z-40 transition-all duration-300 border-b border-green-100"
         >
+            <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between w-full px-4 sm:px-8 py-2 sm:py-0 h-auto sm:h-16 gap-2 sm:gap-0">
             {/* Logo and Brand */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center shadow-md">
                     <span className="text-2xl">📷</span>
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-xl font-bold text-gray-800 tracking-wide">Photo Gallery</span>
+                    <span className="text-lg sm:text-xl font-bold text-gray-800 tracking-wide">Photo Gallery</span>
                     <span className="text-xs text-gray-600 -mt-1">Capture & Share</span>
                 </div>
             </div>
 
             {/* Search Bar */}
-            <div className="ml-8 flex-1 max-w-md">
+            <div className="w-full sm:w-auto flex-1 max-w-xs sm:max-w-md mt-2 sm:mt-0">
                 <form onSubmit={handleSearch} className="relative">
                     <input
                         type="text"
                         placeholder="Search photos, genres..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-white/80 backdrop-blur-sm border border-green-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent transition-all duration-200"
+                        className="w-full pl-10 pr-4 py-2 bg-white/80 backdrop-blur-sm border border-green-200 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent transition-all duration-200"
                     />
                     <button
                         type="submit"
@@ -62,13 +63,13 @@ export default function Navbar({ auth }) {
             </div>
 
             {/* User Menu */}
-            <div className="ml-auto flex items-center gap-3 relative" ref={menuRef}>
+            <div className="flex items-center gap-3 relative w-full sm:w-auto justify-center sm:justify-end mt-2 sm:mt-0" ref={menuRef}>
                 <span className="text-gray-700 font-medium hidden sm:block">{auth?.user?.name}</span>
                 <button
-                    className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center shadow-sm focus:outline-none hover:shadow-lg hover:scale-110 transition-all duration-300 group"
+                    className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center shadow-sm focus:outline-none hover:shadow-lg hover:scale-110 transition-all duration-300 group text-lg sm:text-base"
                     onClick={() => setShowMenu(!showMenu)}
                 >
-                    <span className="text-white font-bold text-sm select-none group-hover:scale-110 transition-transform duration-300">
+                    <span className="text-white font-bold text-base select-none group-hover:scale-110 transition-transform duration-300">
                         {auth?.user?.name?.charAt(0).toUpperCase()}
                     </span>
                     <span className={`absolute -bottom-1 -right-1 w-2 h-2 bg-white rounded-full transition-all duration-300 ${showMenu ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}></span>
@@ -92,7 +93,7 @@ export default function Navbar({ auth }) {
                         </button>
                         <button
                             className="flex items-center gap-3 px-4 py-3 w-full text-gray-700 hover:bg-red-50 hover:text-red-700 transition-all duration-200 text-sm group"
-                            onClick={() => { window.location.href = '/logout'; }}
+                            onClick={() => { Inertia.post('/logout'); }}
                         >
                             <span className="text-lg group-hover:scale-110 transition-transform duration-200">🚪</span> 
                             <span className="font-medium">Logout</span>
@@ -100,6 +101,7 @@ export default function Navbar({ auth }) {
                     </div>
                 )}
             </div>
+        </div>
         </nav>
     );
 } 

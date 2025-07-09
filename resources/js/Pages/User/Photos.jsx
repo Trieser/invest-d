@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import AppLayout from '../../Layouts/AppLayout';
+import View from './View';
 
 export default function Photos({ photos, auth, genres = [], activeGenres = [] }) {
     const [isDragging, setIsDragging] = useState(false);
@@ -8,6 +9,8 @@ export default function Photos({ photos, auth, genres = [], activeGenres = [] })
     const [showGenreModal, setShowGenreModal] = useState(false);
     const [selectedGenre, setSelectedGenre] = useState('');
     const [uploadingBatch, setUploadingBatch] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false);
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
     const fileInputRef = useRef(null);
 
     const handleDragOver = (e) => {
@@ -174,8 +177,8 @@ export default function Photos({ photos, auth, genres = [], activeGenres = [] })
                 </div>
                 {/* Photos Grid */}
                 <div className="md:col-span-2">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mobile-card">
+                        <h2 className="text-lg font-bold text-gray-900 mb-4 mobile-title">
                             My Photos ({photos.length})
                         </h2>
                         {photos.length === 0 ? (
@@ -184,39 +187,40 @@ export default function Photos({ photos, auth, genres = [], activeGenres = [] })
                                 <p className="text-gray-500">No photos yet. Upload your first photo!</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mobile-photo-grid">
                                 {photos.map((photo) => (
-                                    <div key={photo.id} className="bg-gray-50 rounded-lg overflow-hidden shadow hover:shadow-lg transition">
-                                        <div className="w-full h-40 flex items-center justify-center bg-white">
+                                    <div key={photo.id} className="bg-gray-50 rounded-lg overflow-hidden shadow hover:shadow-lg transition mobile-card">
+                                        <div className="w-full flex items-center justify-center bg-white" style={{ minHeight: '100px' }}>
                                             <img
-                                                src={photo.url}
+                                                src={photo.file_path}
                                                 alt={photo.original_name}
-                                                className="max-w-full max-h-full object-contain"
-                                                style={{ background: '#fff', width: 'auto', height: 'auto', display: 'block' }}
-                                                onError={e => { e.target.src = '/images/placeholder.png'; }}
+                                                className="mobile-photo-img"
+                                                onClick={() => { setSelectedPhoto(photo); setShowViewModal(true); }}
+                                                onError={e => { e.target.onerror = null; e.target.src = '/images/placeholder.png'; e.target.style.background = '#f6f6fa'; }}
                                             />
                                         </div>
                                         <div className="p-4">
-                                            <h3 className="font-medium text-gray-900 truncate">
+                                            <h3 className="font-medium text-gray-900 truncate mobile-title">
                                                 {photo.original_name}
                                             </h3>
-                                            <p className="text-xs text-green-700 mb-1">
+                                            <p className="text-xs text-gray-400 mb-1 mobile-photo-meta">{photo.width} x {photo.height} px</p>
+                                            <p className="text-xs text-green-700 mb-1 mobile-photo-meta">
                                                 {photo.genre?.name}
                                             </p>
-                                            <p className="text-sm text-gray-500">
+                                            <p className="text-sm text-gray-500 mobile-photo-meta">
                                                 {(photo.file_size / (1024 * 1024)).toFixed(2)} MB
                                             </p>
-                                            <p className="text-sm text-gray-500">
+                                            <p className="text-sm text-gray-500 mobile-photo-meta">
                                                 {new Date(photo.created_at).toLocaleDateString('en-US')}
                                             </p>
                                             {photo.description && (
-                                                <p className="text-sm text-gray-600 mt-2">
+                                                <p className="text-sm text-gray-600 mt-2 mobile-photo-meta">
                                                     {photo.description}
                                                 </p>
                                             )}
                                             <button
                                                 onClick={() => handleDelete(photo.id)}
-                                                className="mt-3 w-full bg-red-600 text-white py-2 px-3 rounded-md hover:bg-red-700 transition duration-200 text-sm"
+                                                className="mt-3 w-full bg-red-600 text-white py-2 px-3 rounded-md hover:bg-red-700 transition duration-200 text-sm mobile-btn"
                                             >
                                                 Delete
                                             </button>
@@ -278,6 +282,9 @@ export default function Photos({ photos, auth, genres = [], activeGenres = [] })
                     `}</style>
                 </div>
             )}
+
+            {/* View Modal */}
+            <View open={showViewModal} onClose={() => setShowViewModal(false)} photo={selectedPhoto} />
         </AppLayout>
     );
 }

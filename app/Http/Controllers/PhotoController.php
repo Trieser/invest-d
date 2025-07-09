@@ -19,6 +19,11 @@ class PhotoController extends Controller
     public function index()
     {
         $photos = auth()->user()->photos()->latest()->get();
+        // Tambahkan properti file_path publik
+        $photos->transform(function ($photo) {
+            $photo->file_path = '/storage/' . ltrim($photo->file_path, '/');
+            return $photo;
+        });
         
         // Get only genres that have photos
         $activeGenres = Genre::whereHas('photos', function($query) {
@@ -41,6 +46,11 @@ class PhotoController extends Controller
     {
         // Check if user has photos in this genre
         $photos = auth()->user()->photos()->where('genre_id', $genre->id)->latest()->get();
+        // Tambahkan properti file_path publik
+        $photos->transform(function ($photo) {
+            $photo->file_path = '/storage/' . ltrim($photo->file_path, '/');
+            return $photo;
+        });
         
         // Get only genres that have photos
         $activeGenres = Genre::whereHas('photos', function($query) {
