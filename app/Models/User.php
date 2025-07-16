@@ -67,10 +67,7 @@ class User extends Authenticatable
         return $this->role === 'user';
     }
 
-    public function photos()
-    {
-        return $this->hasMany(Photo::class);
-    }
+
 
     public function loginAttempts()
     {

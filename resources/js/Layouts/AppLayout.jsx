@@ -2,13 +2,13 @@ import React from 'react';
 import Sidebar from '../Components/Sidebar';
 import Navbar from '../Components/Navbar';
 
-export default function AppLayout({ children, auth, sidebarProps = {} }) {
+export default function AppLayout({ children, auth, currentPage = "dashboard" }) {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Sidebar */}
             <Sidebar
-                {...sidebarProps}
                 auth={auth}
+                currentPage={currentPage}
             />
             {/* Navbar */}
             <Navbar auth={auth} />

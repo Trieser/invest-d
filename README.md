@@ -1,4 +1,4 @@
-# 📸 DBMS Photo - Modern Photo Management System
+# 💰 Invest-D - Modern Investment Management System
 
 <div align="center">
 
@@ -8,7 +8,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 
-**A modern, responsive photo management system built with Laravel, Inertia.js, and React**
+**A modern, responsive investment management system built with Laravel, Inertia.js, and React**
 
 [🚀 Live Demo](#) • [📖 Documentation](#) • [ Report Bug](#)
 
@@ -25,6 +25,9 @@
 -  **SPA Experience** - Single Page Application with Inertia.js
 - 🌐 **Indonesian Support** - Localized interface in Indonesian
 - 🛡️ **Security First** - Built with Laravel's security best practices
+- 💼 **Investment Tracking** - Monitor your investment portfolio
+- 📊 **Portfolio Analytics** - Track performance and returns
+- 👥 **Role Management** - Admin and user roles with different permissions
 
 ## 🛠️ Tech Stack
 
@@ -65,8 +68,8 @@ git --version
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Trieser/dbms-photo.git
-cd dbms-photo
+git clone https://github.com/Trieser/invest-d.git
+cd invest-d
 ```
 
 ### 2. Install Dependencies
@@ -97,7 +100,7 @@ Edit `.env` file and update database settings:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=dbms_photo
+DB_DATABASE=invest_d
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 ```
@@ -106,7 +109,7 @@ DB_PASSWORD=your_password
 
 ```bash
 # Create database (run in MySQL/phpMyAdmin)
-CREATE DATABASE dbms_photo;
+CREATE DATABASE invest_d;
 
 # Run migrations
 php artisan migrate
@@ -139,5 +142,22 @@ php artisan serve
 
 - **URL**: `http://localhost:8000`
 - **Default Route**: Login page
-- **Admin Panel**: Coming soon...
+- **Admin Panel**: `/admin/dashboard`
+- **User Dashboard**: `/user/dashboard`
+
+## 🔐 Default Users
+
+After running `php artisan db:seed`, you can login with:
+
+- **Admin User**:
+  - Email: `admin@example.com`
+  - Password: `password`
+
+- **Regular User**:
+  - Email: `user@example.com`
+  - Password: `password`
+
+## 📝 License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 

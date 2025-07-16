@@ -10,6 +10,34 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+/* Blob Animation */
+@keyframes blob {
+    0% {
+        transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
 /* Sidebar Popout Animation */
 .animate-popout { 
   animation: popout 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
@@ -24,6 +52,63 @@
     opacity: 1; 
     transform: none; 
   } 
+}
+
+/* Star Background Animation */
+.starry-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  opacity: 0.8;
+  animation: twinkle 2s infinite alternate;
+}
+@keyframes twinkle {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+/* Neon Worm Border Animation */
+.neon-worm {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.neon-worm path {
+  stroke: url(#neon-gradient);
+  stroke-width: 4;
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 8px #00fff7) drop-shadow(0 0 16px #00fff7);
+  animation: wormmove 3s linear infinite;
+}
+
+@keyframes wormmove {
+  0% { stroke-dashoffset: 1200; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes neonmove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px #FFE81F); }
+  50% { opacity: 0.45; filter: drop-shadow(0 0 24px #FFE81F); }
+}
+@keyframes border-blink {
+  0%, 100% { box-shadow: 0 0 32px 8px #00fff7, 0 0 64px 16px #ff0059, 0 0 0 6px #FFE81F inset; }
+  50% { box-shadow: 0 0 48px 16px #FFE81F, 0 0 96px 32px #FFE81F, 0 0 0 12px #FFE81F inset; }
 }
 
 @media (max-width: 640px) {
