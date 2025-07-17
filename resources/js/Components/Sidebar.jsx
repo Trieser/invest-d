@@ -46,7 +46,7 @@ export default function Sidebar({
     return (
         <aside
             className={`
-            fixed z-50 bg-gradient-to-b from-blue-100 via-indigo-50 to-blue-50 shadow-md border border-blue-100
+            fixed z-50 bg-gradient-to-b from-gray-900/80 via-slate-800/80 to-gray-900/80 shadow-md border border-gray-700/50 backdrop-blur-sm
             flex sm:flex-col flex-row items-center justify-between
             sm:left-6 sm:top-1/2 sm:-translate-y-1/2 sm:w-20 sm:rounded-xl sm:py-2 sm:h-auto sm:max-h-[30vh]
             left-0 right-0 bottom-0 w-full h-16 rounded-t-xl
@@ -73,8 +73,8 @@ function SidebarIcon({ icon, label, active, onClick, mobile }) {
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col items-center focus:outline-none transition-all duration-200 hover:scale-110 hover:shadow-lg hover:bg-blue-50 rounded-xl py-1 px-2 ${
-                active ? "font-bold text-blue-700" : "text-gray-700"
+            className={`flex flex-col items-center focus:outline-none transition-all duration-200 hover:scale-110 hover:shadow-lg hover:bg-gray-800/50 rounded-xl py-1 px-2 ${
+                active ? "font-bold text-yellow-400" : "text-gray-300"
             } ${mobile ? "text-xs" : ""}`}
             style={{ wordBreak: "break-word" }}
         >
