@@ -9,13 +9,13 @@ function StarBackground({ count = 100 }) {
             Array.from({ length: count }).map((_, i) => {
                 const top = Math.random() * 100;
                 const left = Math.random() * 100;
-                const size = Math.random() * 2.2 + 0.8;
-                const duration = Math.random() * 2 + 2.5;
-                const delay = Math.random() * 2;
+                const size = Math.random() * 1.5 + 0.5; // Reduced size
+                const duration = Math.random() * 3 + 4; // Slower animation
+                const delay = Math.random() * 3;
                 const color = colors[Math.floor(Math.random() * colors.length)];
-                const opacity = Math.random() * 0.5 + 0.5;
-                const moveX = Math.random() * 10 - 5;
-                const moveY = Math.random() * 10 - 5;
+                const opacity = Math.random() * 0.3 + 0.3; // Lower opacity
+                const moveX = Math.random() * 6 - 3; // Smaller movement
+                const moveY = Math.random() * 6 - 3;
                 return {
                     key: i,
                     top,
@@ -52,7 +52,7 @@ function StarBackground({ count = 100 }) {
                         y: [0, star.moveY, 0],
                         opacity: [
                             star.opacity,
-                            star.opacity * 0.7,
+                            star.opacity * 0.5,
                             star.opacity,
                         ],
                     }}
@@ -83,7 +83,7 @@ function ScrambleText({
                 .split("")
                 .map((char, i) => {
                     if (revealed[i]) return char;
-                    if (Math.random() < frame / (duration / 10)) {
+                    if (Math.random() < frame / (duration / 15)) { // Slower reveal
                         revealed[i] = true;
                         return char;
                     }
@@ -95,21 +95,17 @@ function ScrambleText({
             setDisplay(newText);
             frame++;
             if (revealed.every(Boolean)) clearInterval(interval);
-        }, 40);
+        }, 80); // Increased interval from 40ms to 80ms
         return () => clearInterval(interval);
     }, [text, duration, scrambleChars]);
     return <span style={{ color: '#FFE81F', fontFamily: 'Montserrat, Arial, sans-serif' }}>{display}</span>;
 }
 
-// 1. Tambahkan style blinking di atas komponen (atau gunakan style jsx/global)
+// Simplified blinking style for better performance
 const blinkingStyle = `
 @keyframes blink {
-  0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px #ea3711); }
-  50% { opacity: 0.55; filter: drop-shadow(0 0 12px #FFE81F); }
-}
-@keyframes border-blink {
-  0%, 100% { box-shadow: 0 0 12px 2px #00fff7, 0 0 24px 4px #00fff7, 0 0 0 3px #FFE81F inset; }
-  50% { box-shadow: 0 0 18px 4px #ea3711, 0 0 32px 8px #ea3711, 0 0 0 6px #FFE81F inset; }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 `;
 
@@ -120,7 +116,125 @@ export default function Login({ errors }) {
         remember: false,
     });
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
     const collapseTimeout = useRef(null);
+    
+    // Audio refs
+    const hoverSoundRef = useRef(null);
+    const clickSoundRef = useRef(null);
+    const submitSoundRef = useRef(null);
+    const lightsaberOnRef = useRef(null);
+    const backgroundMusicRef = useRef(null);
+
+    // Initialize audio on component mount
+    useEffect(() => {
+        // Create audio elements
+        hoverSoundRef.current = new Audio('/audio/hover.mp3');
+        clickSoundRef.current = new Audio('/audio/click.mp3');
+        submitSoundRef.current = new Audio('/audio/submit.mp3');
+        lightsaberOnRef.current = new Audio('/audio/Lightsaber On Sound HD.mp3');
+        backgroundMusicRef.current = new Audio('/audio/Star Wars Main Theme (Full).mp3');
+        
+        // Set audio properties
+        hoverSoundRef.current.volume = 0.4;
+        clickSoundRef.current.volume = 0.5;
+        submitSoundRef.current.volume = 0.6;
+        lightsaberOnRef.current.volume = 0.6;
+        backgroundMusicRef.current.volume = 0.3;
+        backgroundMusicRef.current.loop = true;
+        
+        // Add event listeners for music
+        backgroundMusicRef.current.addEventListener('play', () => setIsMusicPlaying(true));
+        backgroundMusicRef.current.addEventListener('pause', () => setIsMusicPlaying(false));
+        backgroundMusicRef.current.addEventListener('ended', () => setIsMusicPlaying(false));
+        
+        // Simple auto-play attempt (only once)
+        const tryAutoPlay = async () => {
+            try {
+                await backgroundMusicRef.current.play();
+                setIsMusicPlaying(true);
+            } catch (error) {
+                // Auto-play failed, that's okay
+                setIsMusicPlaying(false);
+            }
+        };
+
+        // Try auto-play once
+        tryAutoPlay();
+
+        // Simple interaction listener (only one attempt)
+        const startMusicOnInteraction = async () => {
+            if (!isMusicPlaying && backgroundMusicRef.current) {
+                try {
+                    await backgroundMusicRef.current.play();
+                    setIsMusicPlaying(true);
+                    
+                    // Remove listeners after successful start
+                    document.removeEventListener('click', startMusicOnInteraction);
+                    document.removeEventListener('keydown', startMusicOnInteraction);
+                    document.removeEventListener('touchstart', startMusicOnInteraction);
+                } catch (error) {
+                    // Failed, keep listeners active
+                }
+            }
+        };
+
+        // Add basic interaction listeners
+        document.addEventListener('click', startMusicOnInteraction);
+        document.addEventListener('keydown', startMusicOnInteraction);
+        document.addEventListener('touchstart', startMusicOnInteraction);
+        
+        return () => {
+            // Cleanup audio and listeners
+            if (backgroundMusicRef.current) {
+                backgroundMusicRef.current.pause();
+                backgroundMusicRef.current = null;
+            }
+            document.removeEventListener('click', startMusicOnInteraction);
+            document.removeEventListener('keydown', startMusicOnInteraction);
+            document.removeEventListener('touchstart', startMusicOnInteraction);
+        };
+    }, []);
+
+    // Play sound function
+    const playSound = (audioRef) => {
+        if (isSoundEnabled && audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {
+                // Silent fail for sound effects
+            });
+        }
+    };
+
+    // Toggle sound function
+    const toggleSound = () => {
+        setIsSoundEnabled(!isSoundEnabled);
+        if (backgroundMusicRef.current) {
+            if (!isSoundEnabled) {
+                backgroundMusicRef.current.play().catch(e => console.log('Background music play failed'));
+            } else {
+                backgroundMusicRef.current.pause();
+            }
+        }
+    };
+
+    // Toggle music function
+    const toggleMusic = async () => {
+        if (backgroundMusicRef.current) {
+            try {
+                if (isMusicPlaying) {
+                    backgroundMusicRef.current.pause();
+                    setIsMusicPlaying(false);
+                } else {
+                    await backgroundMusicRef.current.play();
+                    setIsMusicPlaying(true);
+                }
+            } catch (error) {
+                // Silent fail for music toggle
+            }
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -132,50 +246,139 @@ export default function Login({ errors }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        playSound(submitSoundRef);
         Inertia.post("/login", formData);
     };
 
-    // Neon border style (animated gradient + blinking)
+    // Neon border style (simplified for better performance)
     const neonBorderStyle = {
         boxShadow: isExpanded
-            ? "0 0 32px 8px #00fff7, 0 0 64px 16px #ff0059, 0 0 0 6px #0ff inset"
-            : "0 0 16px 4px #00fff7, 0 0 32px 8px #ff0059, 0 0 0 3px #0ff inset",
-        border: "2.5px solid transparent",
-        background: "linear-gradient(120deg, #00fff7, #ff0059, #00fff7 80%)",
-        backgroundSize: "200% 200%",
-        backgroundPosition: isExpanded ? "100% 0%" : "0% 100%",
+            ? "0 0 24px 6px #00fff7, 0 0 48px 12px #ff0059, 0 0 0 4px #0ff inset"
+            : "0 0 12px 3px #00fff7, 0 0 24px 6px #ff0059, 0 0 0 2px #0ff inset",
+        border: "2px solid transparent",
+        background: "linear-gradient(120deg, #00fff7, #ff0059)",
         borderRadius: "1.5rem",
         zIndex: 2,
-        transition: "box-shadow 0.4s, border 0.4s, background-position 2s",
-        animation: isExpanded ? "neonmove 3s linear infinite, border-blink 1.6s ease-in-out infinite" : "border-blink 1.6s ease-in-out infinite",
+        transition: "box-shadow 0.3s ease",
     };
 
-    // Auto-collapse logic
+    // Auto-collapse logic with Star Wars sounds
     const handleHoverStart = () => {
         if (collapseTimeout.current) {
             clearTimeout(collapseTimeout.current);
         }
+        // Only play lightsaber sound when transitioning from initial to expanded state
+        if (!isExpanded) {
+            playSound(lightsaberOnRef); // Lightsaber ignition sound
+        }
         setIsExpanded(true);
     };
+    
     const handleHoverEnd = () => {
         if (collapseTimeout.current) {
             clearTimeout(collapseTimeout.current);
         }
         collapseTimeout.current = setTimeout(() => {
             setIsExpanded(false);
+            // Removed lightsaber off sound
         }, 3000);
     };
+    
     const handleMouseEnter = () => {
         if (collapseTimeout.current) {
             clearTimeout(collapseTimeout.current);
         }
     };
 
+    // Handle input focus with sound
+    const handleInputFocus = () => {
+        playSound(clickSoundRef);
+    };
+
     return (
         <div className="min-h-screen flex bg-black font-sans relative overflow-hidden">
             <style>{blinkingStyle}</style>
-            <StarBackground count={1000} />
+            <StarBackground count={200} />
+            
+            {/* Audio Control Panel */}
+            <div className="absolute top-4 right-4 z-30 flex flex-col space-y-2">
+                {/* Start Music Button - Show when music is not playing */}
+                {!isMusicPlaying && (
+                    <motion.button
+                        onClick={toggleMusic}
+                        className="p-3 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 border-2 border-yellow-300 transition-all duration-300 shadow-lg"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        style={{ color: "#000" }}
+                        title="Start Star Wars Music"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </motion.button>
+                )}
+
+                {/* Sound Toggle Button */}
+                <motion.button
+                    onClick={toggleSound}
+                    className="p-3 rounded-full bg-[#181c23] border-2 border-cyan-500 hover:border-cyan-300 transition-all duration-300"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    style={{ color: "#FFE81F" }}
+                    title={isSoundEnabled ? "Disable Sound Effects" : "Enable Sound Effects"}
+                >
+                    {isSoundEnabled ? (
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                    ) : (
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                        </svg>
+                    )}
+                </motion.button>
+
+                {/* Music Toggle Button - Show when music is playing */}
+                {isMusicPlaying && (
+                    <motion.button
+                        onClick={toggleMusic}
+                        className="p-3 rounded-full bg-[#181c23] border-2 border-cyan-500 hover:border-cyan-300 transition-all duration-300"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        style={{ color: "#FFE81F" }}
+                        title="Pause Music"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                    </motion.button>
+                )}
+            </div>
+
             <div className="flex-1 flex flex-col justify-center items-center px-4 py-12 relative z-20">
+                {/* Music Status Indicator */}
+                {!isMusicPlaying && (
+                    <motion.div
+                        className="absolute top-4 left-4 z-30 bg-yellow-500 text-black px-4 py-2 rounded-lg shadow-lg"
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <div className="flex items-center space-x-2">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            <span className="font-bold text-sm">Click anywhere to start Star Wars music!</span>
+                        </div>
+                    </motion.div>
+                )}
+
                 <motion.div
                     className="relative"
                     onHoverStart={handleHoverStart}
@@ -188,14 +391,11 @@ export default function Login({ errors }) {
                         style={neonBorderStyle}
                         animate={{
                             opacity: 1,
-                            filter: isExpanded ? "blur(0.5px)" : "blur(0.2px)",
-                            scale: isExpanded ? 1.03 : 1,
+                            scale: isExpanded ? 1.02 : 1,
                         }}
                         transition={{
-                            duration: 0.5,
-                            type: "spring",
-                            stiffness: 80,
-                            damping: 18,
+                            duration: 0.3,
+                            ease: "easeOut",
                         }}
                     />
                     {/* Main card */}
@@ -209,12 +409,11 @@ export default function Login({ errors }) {
                         animate={{
                             width: isExpanded ? 400 : 300,
                             height: isExpanded ? 600 : 80,
-                            scale: isExpanded ? 1.03 : 1,
+                            scale: isExpanded ? 1.01 : 1,
                         }}
                         transition={{
-                            type: "spring",
-                            stiffness: 80,
-                            damping: 18,
+                            duration: 0.4,
+                            ease: "easeOut",
                         }}
                     >
                         {/* Initial state - just LOGIN text */}
@@ -228,7 +427,7 @@ export default function Login({ errors }) {
                                 >
                                     <div className="flex items-center space-x-3">
                                         <span className="text-2xl font-extrabold tracking-widest drop-shadow-lg blinking-login" style={{fontFamily: 'Montserrat, Arial, sans-serif', color: '#FFE81F', animation: 'blink 1.2s infinite'}}>
-                                        <ScrambleText text="LOGIN" />
+                                        <ScrambleText text="FORCE LOGIN" />
                                         </span>
                                     </div>
                                 </motion.div>
@@ -244,10 +443,10 @@ export default function Login({ errors }) {
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.3, delay: 0.2 }}
                                 >
-                                    {/* Brand/Logo */}
+                                    {/* Brand/Logo with Star Wars theme */}
                                     <div className="mb-8 text-center">
                                         <motion.div
-                                            className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center rounded-2xl shadow-lg mb-4 mx-auto"
+                                            className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center rounded-2xl shadow-lg mb-4 mx-auto"
                                             initial={{ scale: 0, rotate: -180 }}
                                             animate={{ scale: 1, rotate: 0 }}
                                             transition={{
@@ -255,14 +454,13 @@ export default function Login({ errors }) {
                                                 delay: 0.3,
                                             }}
                                         >
+                                            {/* Star Wars inspired icon */}
                                             <svg
                                                 className="w-8 h-8 text-white"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
+                                                fill="currentColor"
                                                 viewBox="0 0 24 24"
                                             >
-                                                <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
                                             </svg>
                                         </motion.div>
                                         <motion.h2
@@ -278,7 +476,7 @@ export default function Login({ errors }) {
                                                 delay: 0.4,
                                             }}
                                         >
-                                            <ScrambleText text="Welcome Back" />
+                                            <ScrambleText text="Welcome" />
                                         </motion.h2>
                                         <motion.p
                                             className="text-cyan-200"
@@ -289,7 +487,7 @@ export default function Login({ errors }) {
                                                 delay: 0.5,
                                             }}
                                         >
-                                            <ScrambleText text="Sign in to your account" />
+                                            <ScrambleText text="May the Force be with you" />
                                         </motion.p>
                                     </div>
                                     <form
@@ -309,7 +507,7 @@ export default function Login({ errors }) {
                                                 className="block text-sm font-bold text-cyan-100 mb-2 tracking-widest"
                                                 style={{ color: "#FFE81F" }}
                                             >
-                                                <ScrambleText text="Email Address" />
+                                                <ScrambleText text="Transmission Code" />
                                             </label>
                                             <div className="relative">
                                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400">
@@ -329,12 +527,13 @@ export default function Login({ errors }) {
                                                     name="email"
                                                     value={formData.email}
                                                     onChange={handleChange}
+                                                    onFocus={handleInputFocus}
                                                     className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-300 transition-all duration-300 bg-[#23272f] text-white placeholder-cyan-200 border-cyan-800 ${
                                                         errors?.email
                                                             ? "border-red-400 bg-red-50"
                                                             : "hover:border-cyan-300"
                                                     }`}
-                                                    placeholder="Enter your email"
+                                                    placeholder="Enter your transmission code"
                                                     required
                                                     style={{ color: "#FFE81F" }}
                                                 />
@@ -358,7 +557,7 @@ export default function Login({ errors }) {
                                                 className="block text-sm font-bold text-cyan-100 mb-2 tracking-widest"
                                                 style={{ color: "#FFE81F" }}
                                             >
-                                                <ScrambleText text="Password" />
+                                                <ScrambleText text="Force Password" />
                                             </label>
                                             <div className="relative">
                                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400">
@@ -378,12 +577,13 @@ export default function Login({ errors }) {
                                                     name="password"
                                                     value={formData.password}
                                                     onChange={handleChange}
+                                                    onFocus={handleInputFocus}
                                                     className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-300 transition-all duration-300 bg-[#23272f] text-white placeholder-cyan-200 border-cyan-800 ${
                                                         errors?.password
                                                             ? "border-red-400 bg-red-50"
                                                             : "hover:border-cyan-300"
                                                     }`}
-                                                    placeholder="Enter your password"
+                                                    placeholder="Enter your force password"
                                                     required
                                                     style={{ color: "#FFE81F" }}
                                                 />
@@ -417,7 +617,7 @@ export default function Login({ errors }) {
                                                     className="ml-2 block text-sm text-cyan-100 tracking-widest"
                                                     style={{ color: "#FFE81F" }}
                                                 >
-                                                    <ScrambleText text="Remember me" />
+                                                    <ScrambleText text="Remember Me" />
                                                 </label>
                                             </div>
                                             <a
@@ -425,7 +625,7 @@ export default function Login({ errors }) {
                                                 className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors tracking-widest"
                                                 style={{ color: "#FFE81F" }}
                                             >
-                                                <ScrambleText text="Forgot password?" />
+                                                <ScrambleText text="Forgot force?" />
                                             </a>
                                         </motion.div>
                                         <motion.button
@@ -442,13 +642,13 @@ export default function Login({ errors }) {
                                                     "0 0 24px 6px #00fff7, 0 0 48px 12px #ff0059",
                                             }}
                                             whileTap={{ scale: 0.95 }}
-                                            className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white font-extrabold py-4 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 transition-all duration-300 text-lg tracking-widest"
+                                            className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-extrabold py-4 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 transition-all duration-300 text-lg tracking-widest"
                                             style={{
-                                                color: "#FFE81F",
+                                                color: "#000",
                                                 borderColor: "#FFE81F",
                                             }}
                                         >
-                                            <ScrambleText text="Sign In" />
+                                            <ScrambleText text="Activate Force" />
                                         </motion.button>
                                     </form>
                                     <motion.div
@@ -464,13 +664,13 @@ export default function Login({ errors }) {
                                             className="text-sm text-cyan-200 tracking-widest"
                                             style={{ color: "#FFE81F" }}
                                         >
-                                            <ScrambleText text="Don't have an account?" />{" "}
+                                            <ScrambleText text="Not a Jedi yet?" />{" "}
                                             <a
                                                 href="#"
                                                 className="text-cyan-400 hover:text-cyan-300 font-bold transition-colors"
                                                 style={{ color: "#FFE81F" }}
                                             >
-                                                <ScrambleText text="Sign up" />
+                                                <ScrambleText text="Join the Order" />
                                             </a>
                                         </p>
                                     </motion.div>
