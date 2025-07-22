@@ -1,10 +1,29 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import ScrambleText from "./Dashboard";
+import gsap from "gsap";
 
 export default function InsightsTab() {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (cardRef.current) {
+      gsap.fromTo(
+        cardRef.current.querySelectorAll(".insight-card, .recommend-card"),
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.12,
+          duration: 0.7,
+          ease: "power2.out",
+        }
+      );
+    }
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-gray-900/80 to-slate-900/80 rounded-xl p-6 border border-gray-700/50 backdrop-blur-sm">
+    <div className="space-y-6" ref={cardRef}>
+      <div className="insight-card bg-gradient-to-r from-gray-900/80 to-slate-900/80 rounded-xl p-6 border border-gray-700/50 backdrop-blur-sm">
         <h3 className="text-xl font-semibold text-white flex items-center">
           <span className="mr-2">💡</span>
           <ScrambleText text="Investment Insights" />
@@ -28,7 +47,7 @@ export default function InsightsTab() {
           </div>
         </div>
       </div>
-      <div className="bg-gradient-to-br from-gray-900/80 to-slate-900/80 rounded-xl shadow-sm border border-gray-700/50 p-6 backdrop-blur-sm">
+      <div className="recommend-card bg-gradient-to-br from-gray-900/80 to-slate-900/80 rounded-xl shadow-sm border border-gray-700/50 p-6 backdrop-blur-sm">
         <h3 className="text-lg font-semibold text-white">Rekomendasi</h3>
         <div className="space-y-3">
           <div className="flex items-start space-x-3 bg-green-900 rounded-lg border border-green-800 p-3">

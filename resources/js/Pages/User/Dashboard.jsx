@@ -339,23 +339,18 @@ export default function UserDashboard({ auth, user }) {
                         data.chart.result[0]
                     ) {
                         const result = data.chart.result[0];
-                        console.log(
-                            `Success for ${stock.symbol}:`,
-                            result.meta
-                        );
+                        const meta = result.meta || {};
                         return {
                             symbol: stock.symbol,
                             name: stock.name,
-                            price: result.meta.regularMarketPrice,
-                            prevClose: result.meta.previousClose,
-                            change:
-                                result.meta.regularMarketPrice -
-                                result.meta.previousClose,
-                            changePercent:
-                                ((result.meta.regularMarketPrice -
-                                    result.meta.previousClose) /
-                                    result.meta.previousClose) *
-                                100,
+                            shortName: meta.shortName || stock.name,
+                            price: meta.regularMarketPrice,
+                            prevClose: meta.chartPreviousClose || meta.previousClose,
+                            high: meta.regularMarketDayHigh,
+                            low: meta.regularMarketDayLow,
+                            volume: meta.regularMarketVolume,
+                            change: meta.regularMarketPrice - (meta.chartPreviousClose || meta.previousClose),
+                            changePercent: ((meta.regularMarketPrice - (meta.chartPreviousClose || meta.previousClose)) / (meta.chartPreviousClose || meta.previousClose)) * 100,
                         };
                     }
                     return {
