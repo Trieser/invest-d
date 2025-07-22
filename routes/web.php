@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\InvestmentController;
+use App\Http\Controllers\InvestmentSnapshotController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -111,4 +113,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // User routes
 Route::prefix('user')->name('user.')->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+});
+
+// Investment routes 
+Route::middleware('auth')->group(function () {
+    // Investment
+    Route::get('/investments', [InvestmentController::class, 'index']);
+    Route::post('/investments', [InvestmentController::class, 'store']);
+
+    // Investment Snapshots
+    Route::get('/investment-snapshots', [InvestmentSnapshotController::class, 'index']);
+    Route::post('/investment-snapshots', [InvestmentSnapshotController::class, 'store']);
+    Route::get('/investment-snapshots/latest', [InvestmentSnapshotController::class, 'latest']);
 });
