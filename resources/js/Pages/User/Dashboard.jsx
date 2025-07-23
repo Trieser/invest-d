@@ -209,6 +209,8 @@ export default function UserDashboard({ auth, user }) {
     const [summary, setSummary] = useState(null);
     const [history, setHistory] = useState([]);
     const [investments, setInvestments] = useState([]);
+    const [showValues, setShowValues] = useState(true);
+    const toggleShowValues = () => setShowValues((v) => !v);
 
     // Fetch summary, history, investments
     useEffect(() => {
@@ -413,31 +415,46 @@ export default function UserDashboard({ auth, user }) {
                                     <p className="text-gray-300 italic text-lg mb-6 max-w-2xl">
                                         "{quote}"
                                     </p>
+                                    {/* Eye Button */}
+                                    <div className="flex justify-end mb-2">
+                                        <button
+                                            onClick={toggleShowValues}
+                                            className="text-gray-400 hover:text-yellow-400 transition"
+                                            title={showValues ? "Sembunyikan Nilai" : "Tampilkan Nilai"}
+                                            type="button"
+                                        >
+                                            {showValues ? (
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            ) : (
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95M6.873 6.876A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.043 5.112M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
+                                                </svg>
+                                            )}
+                                        </button>
+                                    </div>
                                     {/* Portfolio Summary Cards */}
                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                         <div className="bg-gradient-to-br from-gray-800 to-slate-900 rounded-xl p-4 border border-gray-700">
                                             <div className="text-gray-300 text-sm font-medium">
                                                 Total Portfolio
                                             </div>
-                                            <div className="text-2xl font-bold text-white">
-                                                {formatCurrency(
-                                                    portfolioData.totalValue
-                                                )}
+                                            <div className={showValues ? "text-2xl font-bold text-white" : "text-2xl font-bold text-white blur-sm select-none"}>
+                                                {showValues ? formatCurrency(portfolioData.totalValue) : "••••••••"}
                                             </div>
-                                            <div className="text-green-300">
-                                                {formatPercentage(
-                                                    portfolioData.gainPercentage
-                                                )}
+                                            <div className={showValues ? "text-green-300" : "text-green-300 blur-sm select-none"}>
+                                                {showValues ? formatPercentage(portfolioData.gainPercentage) : "•••"}
                                             </div>
                                         </div>
                                         <div className="bg-gradient-to-br from-gray-800 to-slate-900 rounded-xl p-4 border border-gray-700">
                                             <div className="text-gray-300 text-sm font-medium">
                                                 Total Gain
                                             </div>
-                                            <div className="text-2xl font-bold text-green-300">
-                                                {formatCurrency(
-                                                    portfolioData.totalGain
-                                                )}
+                                            <div className={showValues ? "text-2xl font-bold text-green-300" : "text-2xl font-bold text-green-300 blur-sm select-none"}>
+                                                {showValues ? formatCurrency(portfolioData.totalGain) : "••••••••"}
                                             </div>
                                             <div className="text-gray-300 text-sm">
                                                 This year
@@ -447,10 +464,8 @@ export default function UserDashboard({ auth, user }) {
                                             <div className="text-gray-300 text-sm font-medium">
                                                 Monthly Change
                                             </div>
-                                            <div className="text-2xl font-bold text-gray-200">
-                                                {formatPercentage(
-                                                    portfolioData.monthlyChange
-                                                )}
+                                            <div className={showValues ? "text-2xl font-bold text-gray-200" : "text-2xl font-bold text-gray-200 blur-sm select-none"}>
+                                                {showValues ? formatPercentage(portfolioData.monthlyChange) : "•••"}
                                             </div>
                                             <div className="text-gray-300 text-sm">
                                                 This month
@@ -460,11 +475,8 @@ export default function UserDashboard({ auth, user }) {
                                             <div className="text-gray-300 text-sm font-medium">
                                                 Active Holdings
                                             </div>
-                                            <div className="text-2xl font-bold text-white">
-                                                {
-                                                    portfolioData.topHoldings
-                                                        .length
-                                                }
+                                            <div className={showValues ? "text-2xl font-bold text-white" : "text-2xl font-bold text-white blur-sm select-none"}>
+                                                {showValues ? portfolioData.topHoldings.length : "••"}
                                             </div>
                                             <div className="text-gray-300 text-sm">
                                                 This quarter
