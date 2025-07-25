@@ -193,6 +193,7 @@ export default function UserDashboard({ auth, user }) {
     const [showAddInvestment, setShowAddInvestment] = useState(false);
     const [investmentForm, setInvestmentForm] = useState({
         name: "",
+        symbol: "",
         type: "",
         lot: "",
         amount: "",
@@ -250,6 +251,7 @@ export default function UserDashboard({ auth, user }) {
             setShowAddInvestment(false);
             setInvestmentForm({
                 name: "",
+                symbol: "",
                 type: "",
                 lot: "",
                 amount: "",

@@ -43,7 +43,7 @@ export default function IDXTab({ idxSearch, setIdxSearch, idxData, idxLoading })
             <tr className="text-gray-400 border-b border-gray-700">
               <th className="py-3 px-3">Code</th>
               <th className="py-3 px-3">Name</th>
-              <th className="py-3 px-3">Pricel</th>
+              <th className="py-3 px-3">Price</th>
               <th className="py-3 px-3">Prev Close</th>
               <th className="py-3 px-3">High</th>
               <th className="py-3 px-3">Low</th>

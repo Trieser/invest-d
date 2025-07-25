@@ -13,6 +13,7 @@ class InvestmentController extends Controller
     {
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
+            'symbol'    => 'required|string|max:20',
             'type'      => 'required|string|max:100',
             'lot'       => 'required|integer|min:0',
             'amount'    => 'required|numeric',

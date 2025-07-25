@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Create from "./Create";
 import gsap from "gsap";
 
@@ -16,6 +16,7 @@ export default function OverviewTab({
   handleAddSnapshot
 }) {
   const tableBodyRef = useRef(null);
+  const [fetchingName, setFetchingName] = useState(false);
 
   useEffect(() => {
     if (tableBodyRef.current) {
@@ -32,6 +33,38 @@ export default function OverviewTab({
       );
     }
   }, [investments]);
+
+  // Update name otomatis dari API saat symbol berubah
+  useEffect(() => {
+    if (!investmentForm.symbol) return;
+    setFetchingName(true);
+    const fetchName = async () => {
+      try {
+        const res = await fetch(`/api/stock-data/${investmentForm.symbol}`);
+        const data = await res.json();
+        let name = "";
+        if (data.chart && data.chart.result && data.chart.result[0]?.meta) {
+          name = data.chart.result[0].meta.shortName || data.chart.result[0].meta.name || investmentForm.symbol;
+        } else {
+          name = investmentForm.symbol;
+        }
+        setInvestmentForm(f => ({ ...f, name }));
+      } catch {
+        setInvestmentForm(f => ({ ...f, name: investmentForm.symbol }));
+      } finally {
+        setFetchingName(false);
+      }
+    };
+    fetchName();
+    // eslint-disable-next-line
+  }, [investmentForm.symbol]);
+
+  // Update amount otomatis saat lot berubah
+  useEffect(() => {
+    const lot = Number(investmentForm.lot) || 0;
+    setInvestmentForm(f => ({ ...f, amount: lot ? lot * 100 : 0 }));
+    // eslint-disable-next-line
+  }, [investmentForm.lot]);
 
   return (
     <div className="space-y-8">
@@ -58,10 +91,17 @@ export default function OverviewTab({
       <Create show={showAddInvestment} onClose={() => setShowAddInvestment(false)}>
         <h2 className="text-xl font-bold text-white mb-4">Add Investment</h2>
         <form onSubmit={handleAddInvestment} className="space-y-3">
-          <input className="w-full p-2 rounded bg-gray-800 text-white" placeholder="Name" required
-            value={investmentForm.name}
-            onChange={e => setInvestmentForm(f => ({ ...f, name: e.target.value }))}
+          <input className="w-full p-2 rounded bg-gray-800 text-white" placeholder="Symbol (e.g. CDIA.JK)" required
+            value={investmentForm.symbol.replace('.JK', '')}
+            onChange={e => {
+              let symbol = e.target.value.toUpperCase();
+              if (!symbol.endsWith('.JK') && /^[A-Z]{3,5}$/.test(symbol)) {
+                symbol = symbol + '.JK';
+              }
+              setInvestmentForm(f => ({ ...f, symbol }));
+            }}
           />
+          {/* Name dihilangkan dari form, diisi otomatis di state */}
           <input className="w-full p-2 rounded bg-gray-800 text-white" placeholder="Type (e.g. saham, reksadana)" required
             value={investmentForm.type}
             onChange={e => setInvestmentForm(f => ({ ...f, type: e.target.value }))}
@@ -73,30 +113,9 @@ export default function OverviewTab({
               type="number"
               min="0"
               value={investmentForm.lot}
-              onChange={e => {
-                const lot = e.target.value;
-                setInvestmentForm(f => ({
-                  ...f,
-                  lot,
-                  amount: lot ? Number(lot) * 100 : ""
-                }));
-              }}
+              onChange={e => setInvestmentForm(f => ({ ...f, lot: e.target.value }))}
             />
-            <input
-              className="w-1/2 p-2 rounded bg-gray-800 text-white"
-              placeholder="Amount (lembar)"
-              type="number"
-              min="0"
-              value={investmentForm.amount}
-              onChange={e => {
-                const amount = e.target.value;
-                setInvestmentForm(f => ({
-                  ...f,
-                  amount,
-                  lot: amount ? (Number(amount) / 100).toString() : ""
-                }));
-              }}
-            />
+            {/* Amount dihilangkan dari form, diisi otomatis di state */}
           </div>
           <input className="w-full p-2 rounded bg-gray-800 text-white" placeholder="Buy Price" type="number" required
             value={investmentForm.buy_price}
@@ -110,7 +129,9 @@ export default function OverviewTab({
             value={investmentForm.notes}
             onChange={e => setInvestmentForm(f => ({ ...f, notes: e.target.value }))}
           />
-          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded mt-2">Save</button>
+          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded mt-2 disabled:opacity-60 disabled:cursor-not-allowed" disabled={fetchingName || !investmentForm.name || (investmentForm.name === investmentForm.symbol && investmentForm.symbol)}>
+            {fetchingName ? 'Loading...' : 'Save'}
+          </button>
         </form>
       </Create>
 
